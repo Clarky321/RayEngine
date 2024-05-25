@@ -5,6 +5,7 @@
 #include <iostream>
 #include <memory>
 
+// Функция для рендеринга модели с учётом позиции и вращения
 void RenderModel(const magicavoxel::VoxDenseModel& model, Vector3 position, float scale, Vector3 rotation)
 {
     for (uint32_t z = 0; z < model.size().z; ++z)
@@ -21,9 +22,8 @@ void RenderModel(const magicavoxel::VoxDenseModel& model, Vector3 position, floa
                     Vector3 voxelPosition = { x * scale, y * scale, z * scale };
 
                     // Применение вращения
-                    voxelPosition = Vector3RotateByAxisAngle(voxelPosition, { 1, 0, 0 }, DEG2RAD * rotation.x);
-                    voxelPosition = Vector3RotateByAxisAngle(voxelPosition, { 0, 1, 0 }, DEG2RAD * rotation.y);
-                    voxelPosition = Vector3RotateByAxisAngle(voxelPosition, { 0, 0, 1 }, DEG2RAD * rotation.z);
+                    Matrix rotationMatrix = MatrixRotateXYZ(Vector3 { DEG2RAD* rotation.x, DEG2RAD* rotation.y, DEG2RAD* rotation.z });
+                    voxelPosition = Vector3Transform(voxelPosition, rotationMatrix);
 
                     // Смещение модели для корректного отображения
                     voxelPosition = Vector3Add(voxelPosition, position);
@@ -35,6 +35,7 @@ void RenderModel(const magicavoxel::VoxDenseModel& model, Vector3 position, floa
     }
 }
 
+// Функция для получения ограничивающего прямоугольника модели
 BoundingBox GetModelBoundingBox(const magicavoxel::VoxDenseModel& model, Vector3 position, float scale, Vector3 rotation)
 {
     Vector3 min = { FLT_MAX, FLT_MAX, FLT_MAX };
@@ -52,9 +53,8 @@ BoundingBox GetModelBoundingBox(const magicavoxel::VoxDenseModel& model, Vector3
                     Vector3 voxelPosition = { x * scale, y * scale, z * scale };
 
                     // Применение вращения
-                    voxelPosition = Vector3RotateByAxisAngle(voxelPosition, { 1, 0, 0 }, DEG2RAD * rotation.x);
-                    voxelPosition = Vector3RotateByAxisAngle(voxelPosition, { 0, 1, 0 }, DEG2RAD * rotation.y);
-                    voxelPosition = Vector3RotateByAxisAngle(voxelPosition, { 0, 0, 1 }, DEG2RAD * rotation.z);
+                    Matrix rotationMatrix = MatrixRotateXYZ(Vector3 { DEG2RAD* rotation.x, DEG2RAD* rotation.y, DEG2RAD* rotation.z });
+                    voxelPosition = Vector3Transform(voxelPosition, rotationMatrix);
 
                     // Смещение модели для корректного отображения
                     voxelPosition = Vector3Add(voxelPosition, position);
@@ -66,7 +66,7 @@ BoundingBox GetModelBoundingBox(const magicavoxel::VoxDenseModel& model, Vector3
         }
     }
 
-    return (BoundingBox{ min, max });
+    return (BoundingBox { min, max });
 }
 
 int main()
@@ -82,7 +82,7 @@ int main()
     try
     {
         magicavoxel::VoxFile voxFile(true, true, true);
-        voxFile.Load("../../vox/T-Rex/T-Rex.vox");
+        voxFile.Load("../../vox/T-Rex/deer.vox");
 
         for (auto& frame : voxFile.denseModels())
         {
@@ -156,6 +156,11 @@ int main()
         if (IsKeyDown(KEY_A)) movement = Vector3Subtract(movement, right);
         if (IsKeyDown(KEY_D)) movement = Vector3Add(movement, right);
 
+        if (Vector3Length(movement) > 0.0f)
+        {
+            modelRotation.y = atan2(movement.x, movement.z) * RAD2DEG;
+        }
+
         movement = Vector3Normalize(movement);
         movement = Vector3Scale(movement, moveSpeed * deltaTime);
 
@@ -176,9 +181,9 @@ int main()
         modelPosition = Vector3Add(modelPosition, modelVelocity);
 
         // Проверка коллизии с землей
-        if (modelPosition.y <= 0.5f)
+        if (modelPosition.y <= 0.0f)
         {
-            modelPosition.y = 0.5f;
+            modelPosition.y = 0.0f;
             modelVelocity.y = 0;
             isGrounded = true;
         }
