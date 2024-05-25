@@ -5,7 +5,7 @@
 #include <iostream>
 #include <memory>
 
-void RenderModel(const magicavoxel::VoxDenseModel& model, Vector3 position, float scale)
+void RenderModel(const magicavoxel::VoxDenseModel& model, Vector3 position, float scale, Vector3 rotation)
 {
     for (uint32_t z = 0; z < model.size().z; ++z)
     {
@@ -14,12 +14,20 @@ void RenderModel(const magicavoxel::VoxDenseModel& model, Vector3 position, floa
             for (uint32_t x = 0; x < model.size().x; ++x)
             {
                 uint8_t colorIndex = model.voxel(x, y, z);
-
                 if (colorIndex != 0)
                 {
                     magicavoxel::Color color = model.palette()[colorIndex];
                     Color raylibColor = { color.r, color.g, color.b, color.a };
-                    Vector3 voxelPosition = { position.x + x * scale, position.y + y * scale, position.z + z * scale };
+                    Vector3 voxelPosition = { x * scale, y * scale, z * scale };
+
+                    // Применение вращения
+                    voxelPosition = Vector3RotateByAxisAngle(voxelPosition, { 1, 0, 0 }, DEG2RAD * rotation.x);
+                    voxelPosition = Vector3RotateByAxisAngle(voxelPosition, { 0, 1, 0 }, DEG2RAD * rotation.y);
+                    voxelPosition = Vector3RotateByAxisAngle(voxelPosition, { 0, 0, 1 }, DEG2RAD * rotation.z);
+
+                    // Смещение модели для корректного отображения
+                    voxelPosition = Vector3Add(voxelPosition, position);
+
                     DrawCube(voxelPosition, scale, scale, scale, raylibColor);
                 }
             }
@@ -27,45 +35,72 @@ void RenderModel(const magicavoxel::VoxDenseModel& model, Vector3 position, floa
     }
 }
 
+BoundingBox GetModelBoundingBox(const magicavoxel::VoxDenseModel& model, Vector3 position, float scale, Vector3 rotation)
+{
+    Vector3 min = { FLT_MAX, FLT_MAX, FLT_MAX };
+    Vector3 max = { -FLT_MAX, -FLT_MAX, -FLT_MAX };
+
+    for (uint32_t z = 0; z < model.size().z; ++z)
+    {
+        for (uint32_t y = 0; y < model.size().y; ++y)
+        {
+            for (uint32_t x = 0; x < model.size().x; ++x)
+            {
+                uint8_t colorIndex = model.voxel(x, y, z);
+                if (colorIndex != 0)
+                {
+                    Vector3 voxelPosition = { x * scale, y * scale, z * scale };
+
+                    // Применение вращения
+                    voxelPosition = Vector3RotateByAxisAngle(voxelPosition, { 1, 0, 0 }, DEG2RAD * rotation.x);
+                    voxelPosition = Vector3RotateByAxisAngle(voxelPosition, { 0, 1, 0 }, DEG2RAD * rotation.y);
+                    voxelPosition = Vector3RotateByAxisAngle(voxelPosition, { 0, 0, 1 }, DEG2RAD * rotation.z);
+
+                    // Смещение модели для корректного отображения
+                    voxelPosition = Vector3Add(voxelPosition, position);
+
+                    min = Vector3Min(min, voxelPosition);
+                    max = Vector3Max(max, voxelPosition);
+                }
+            }
+        }
+    }
+
+    return (BoundingBox{ min, max });
+}
+
 int main()
 {
-    const int screenWidth = 800;
-    const int screenHeight = 600;
+    const int screenWidth = 1024;
+    const int screenHeight = 800;
 
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
-
-    InitWindow(screenWidth, screenHeight, "3D Grid with Movable Model");
-
+    InitWindow(screenWidth, screenHeight, "Game");
     SetTargetFPS(60);
 
-    std::vector<std::unique_ptr<magicavoxel::VoxDenseModel>> denseModels;
-    std::vector<std::unique_ptr<magicavoxel::VoxSparseModel>> sparseModels;
-
+    std::vector<std::vector<std::unique_ptr<magicavoxel::VoxDenseModel>>> animationFrames;
     try
     {
         magicavoxel::VoxFile voxFile(true, true, true);
-        voxFile.Load("../../vox/3x3x3.vox");
+        voxFile.Load("../../vox/T-Rex/T-Rex.vox");
 
-        for (auto& model : voxFile.denseModels())
+        for (auto& frame : voxFile.denseModels())
         {
-            denseModels.push_back(std::make_unique<magicavoxel::VoxDenseModel>(std::move(model)));
-        }
-
-        for (auto& model : voxFile.sparseModels())
-        {
-            sparseModels.push_back(std::make_unique<magicavoxel::VoxSparseModel>(std::move(model)));
+            std::vector<std::unique_ptr<magicavoxel::VoxDenseModel>> frameModels;
+            frameModels.push_back(std::make_unique<magicavoxel::VoxDenseModel>(std::move(frame)));
+            animationFrames.push_back(std::move(frameModels));
         }
     }
     catch (const magicavoxel::VoxException& e)
     {
         std::cerr << "Error loading VOX files: " << e.what() << std::endl;
-        return -1; // Добавьте выход из программы, если файл не загрузился
+        return -1;
     }
 
-    Vector3 modelPosition = { 0.0f, 0.5f, 0.0f };
+    Vector3 modelPosition = { 0.0f, 0.0f, 0.0f };
     Vector3 modelVelocity = { 0.0f, 0.0f, 0.0f };
-
-    float modelScale = 0.5f;  // Масштабирование модели для корректного отображения
+    Vector3 modelRotation = { -90.0f, 0.0f, 0.0f };
+    float modelScale = 0.1f;
     float gridSize = 50.0f;
     float moveSpeed = 8.0f;
     float gravity = 1.0f;
@@ -86,15 +121,18 @@ int main()
     DisableCursor();
     SetMousePosition(screenWidth / 2, screenHeight / 2);
 
+    float frameTime = 0.1f; // Время показа одного кадра анимации
+    float frameCounter = 0.0f;
+    int currentFrame = 0;
+
     while (!WindowShouldClose())
     {
         float deltaTime = GetFrameTime();
 
-        // Обновление углов камеры без нажатия правой кнопки мыши
+        // Обновление углов камеры
         Vector2 mouseDelta = GetMouseDelta();
         cameraAngleY += mouseDelta.x * 0.003f;
         cameraAngleX += mouseDelta.y * 0.003f;
-
         cameraAngleX = Clamp(cameraAngleX, -PI / 2.0f + 0.1f, PI / 2.0f - 0.1f);
 
         cameraDistance -= GetMouseWheelMove() * 0.5f;
@@ -103,10 +141,10 @@ int main()
         camera.position.x = modelPosition.x + cos(cameraAngleY) * cos(cameraAngleX) * cameraDistance;
         camera.position.z = modelPosition.z + sin(cameraAngleY) * cos(cameraAngleX) * cameraDistance;
         camera.position.y = modelPosition.y + sin(cameraAngleX) * cameraDistance;
-        camera.target = modelPosition;
+        camera.target = Vector3Add(modelPosition, Vector3{ 0.0f, 0.5f * modelScale * animationFrames[currentFrame][0]->size().y, 0.0f });
 
         Vector3 forward = Vector3Normalize(Vector3Subtract(camera.target, camera.position));
-        forward.y = 0.0f; // Движение только по горизонтали
+        forward.y = 0.0f;
         forward = Vector3Normalize(forward);
 
         Vector3 right = Vector3CrossProduct(forward, camera.up);
@@ -138,9 +176,9 @@ int main()
         modelPosition = Vector3Add(modelPosition, modelVelocity);
 
         // Проверка коллизии с землей
-        if (modelPosition.y <= 0.5f) // Отображение модели на земле (с учетом масштаба)
+        if (modelPosition.y <= 0.5f)
         {
-            modelPosition.y = 0.5f; // Отображение модели на земле (с учетом масштаба)
+            modelPosition.y = 0.5f;
             modelVelocity.y = 0;
             isGrounded = true;
         }
@@ -153,14 +191,25 @@ int main()
         modelPosition.x = Clamp(modelPosition.x, -gridSize / 2, gridSize / 2);
         modelPosition.z = Clamp(modelPosition.z, -gridSize / 2, gridSize / 2);
 
+        // Обновление текущего кадра анимации
+        frameCounter += deltaTime;
+        if (frameCounter >= frameTime)
+        {
+            frameCounter = 0.0f;
+            currentFrame = (currentFrame + 1) % animationFrames.size();
+        }
+
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
         BeginMode3D(camera);
 
-        if (!denseModels.empty())
+        if (!animationFrames.empty() && !animationFrames[currentFrame].empty())
         {
-            RenderModel(*denseModels[0], modelPosition, modelScale);
+            RenderModel(*animationFrames[currentFrame][0], modelPosition, modelScale, modelRotation);
+
+            BoundingBox bbox = GetModelBoundingBox(*animationFrames[currentFrame][0], modelPosition, modelScale, modelRotation);
+            DrawBoundingBox(bbox, GREEN);
         }
 
         // Рисование сетки
