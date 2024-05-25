@@ -6,11 +6,15 @@ set(ENGINE_PROJECT_NAME RayEngineCore)
 
 # Список публичных заголовочных файлов
 set(ENGINE_PUBLIC_INCLUDES
+	includes//RayEngineCore/vox_file.h
+	
 	includes/RayEngineCore/test.h
 )
 
 # Список приватных исходных файлов
 set(ENGINE_PRIVATE_SOURCES
+	src/RayEngineCore/vox_file.cpp
+	
 	src/RayEngineCore/test.cpp
 )
 
