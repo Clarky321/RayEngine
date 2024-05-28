@@ -4,13 +4,13 @@
 #include <vector>
 #include <memory>
 
-// Функция для рендеринга модели с учётом позиции и вращения
+// Р¤СѓРЅРєС†РёСЏ РґР»СЏ СЂРµРЅРґРµСЂРёРЅРіР° РјРѕРґРµР»Рё СЃ СѓС‡С‘С‚РѕРј РїРѕР·РёС†РёРё Рё РІСЂР°С‰РµРЅРёСЏ
 void RenderModel(Model model, Vector3 position, float scale, Vector3 rotation)
 {
     DrawModelEx(model, position, Vector3{ 1.0f, 0.0f, 0.0f }, rotation.x, Vector3{ scale, scale, scale }, WHITE);
 }
 
-// Функция для получения ограничивающего прямоугольника модели
+// Р¤СѓРЅРєС†РёСЏ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ РѕРіСЂР°РЅРёС‡РёРІР°СЋС‰РµРіРѕ РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРёРєР° РјРѕРґРµР»Рё
 BoundingBox GetModelBoundingBox(Model model, Vector3 position, float scale, Vector3 rotation)
 {
     BoundingBox bbox = GetModelBoundingBox(model);
@@ -28,7 +28,7 @@ int main()
     InitWindow(screenWidth, screenHeight, "Game");
     SetTargetFPS(60);
 
-    // Загрузка .vox модели с помощью raylib
+    // Р—Р°РіСЂСѓР·РєР° .vox РјРѕРґРµР»Рё СЃ РїРѕРјРѕС‰СЊСЋ raylib
     Model model = LoadModel("../../vox/T-Rex/deer.vox");
     Vector3 modelPosition = { 0.0f, 0.0f, 0.0f };
     Vector3 modelVelocity = { 0.0f, 0.0f, 0.0f };
@@ -59,7 +59,7 @@ int main()
     {
         float deltaTime = GetFrameTime();
 
-        // Обновление углов камеры
+        // РћР±РЅРѕРІР»РµРЅРёРµ СѓРіР»РѕРІ РєР°РјРµСЂС‹
         Vector2 mouseDelta = GetMouseDelta();
         cameraAngleY += mouseDelta.x * 0.003f;
         cameraAngleX += mouseDelta.y * 0.003f;
@@ -68,7 +68,7 @@ int main()
         cameraDistance -= GetMouseWheelMove() * 0.5f;
         cameraDistance = Clamp(cameraDistance, 1.0f, 50.0f);
 
-        // Обновление позиции камеры
+        // РћР±РЅРѕРІР»РµРЅРёРµ РїРѕР·РёС†РёРё РєР°РјРµСЂС‹
         camera.position.x = modelPosition.x + cos(cameraAngleY) * cos(cameraAngleX) * cameraDistance;
         camera.position.z = modelPosition.z + sin(cameraAngleY) * cos(cameraAngleX) * cameraDistance;
         camera.position.y = modelPosition.y + sin(cameraAngleX) * cameraDistance;
@@ -98,20 +98,20 @@ int main()
         modelPosition.x += movement.x;
         modelPosition.z += movement.z;
 
-        // Добавление прыжка
+        // Р”РѕР±Р°РІР»РµРЅРёРµ РїСЂС‹Р¶РєР°
         if (isGrounded && IsKeyPressed(KEY_SPACE))
         {
             modelVelocity.y = jumpSpeed;
             isGrounded = false;
         }
 
-        // Применение гравитации
+        // РџСЂРёРјРµРЅРµРЅРёРµ РіСЂР°РІРёС‚Р°С†РёРё
         modelVelocity.y -= gravity * deltaTime;
 
-        // Обновление позиции модели с учетом скорости
+        // РћР±РЅРѕРІР»РµРЅРёРµ РїРѕР·РёС†РёРё РјРѕРґРµР»Рё СЃ СѓС‡РµС‚РѕРј СЃРєРѕСЂРѕСЃС‚Рё
         modelPosition = Vector3Add(modelPosition, modelVelocity);
 
-        // Проверка коллизии с землей
+        // РџСЂРѕРІРµСЂРєР° РєРѕР»Р»РёР·РёРё СЃ Р·РµРјР»РµР№
         if (modelPosition.y <= 0.0f)
         {
             modelPosition.y = 0.0f;
@@ -123,7 +123,7 @@ int main()
             isGrounded = false;
         }
 
-        // Ограничение позиции модели в пределах сетки
+        // РћРіСЂР°РЅРёС‡РµРЅРёРµ РїРѕР·РёС†РёРё РјРѕРґРµР»Рё РІ РїСЂРµРґРµР»Р°С… СЃРµС‚РєРё
         modelPosition.x = Clamp(modelPosition.x, -gridSize / 2, gridSize / 2);
         modelPosition.z = Clamp(modelPosition.z, -gridSize / 2, gridSize / 2);
 
@@ -137,7 +137,7 @@ int main()
         BoundingBox bbox = GetModelBoundingBox(model, modelPosition, modelScale, modelRotation);
         DrawBoundingBox(bbox, GREEN);
 
-        // Рисование сетки
+        // Р РёСЃРѕРІР°РЅРёРµ СЃРµС‚РєРё
         for (float i = -gridSize / 2; i <= gridSize / 2; i++)
         {
             DrawLine3D(Vector3{ i, 0.0f, -gridSize / 2 }, Vector3{ i, 0.0f, gridSize / 2 }, LIGHTGRAY);
@@ -146,17 +146,17 @@ int main()
 
         EndMode3D();
 
-        // Рисование прицела по центру экрана
+        // Р РёСЃРѕРІР°РЅРёРµ РїСЂРёС†РµР»Р° РїРѕ С†РµРЅС‚СЂСѓ СЌРєСЂР°РЅР°
         DrawLine(screenWidth / 2 - 10, screenHeight / 2, screenWidth / 2 + 10, screenHeight / 2, DARKGRAY);
         DrawLine(screenWidth / 2, screenHeight / 2 - 10, screenWidth / 2, screenHeight / 2 + 10, DARKGRAY);
 
-        // Рисование текста
+        // Р РёСЃРѕРІР°РЅРёРµ С‚РµРєСЃС‚Р°
         DrawText("Use WASD to move the model, SPACE to jump", 10, 10, 20, DARKGRAY);
 
         EndDrawing();
     }
 
-    UnloadModel(model); // Освобождение модели
+    UnloadModel(model); // РћСЃРІРѕР±РѕР¶РґРµРЅРёРµ РјРѕРґРµР»Рё
     CloseWindow();
 
     return 0;

@@ -5,16 +5,12 @@ cmake_minimum_required(VERSION 3.12)
 set(ENGINE_PROJECT_NAME RayEngineCore)
 
 # Список публичных заголовочных файлов
-set(ENGINE_PUBLIC_INCLUDES
-	includes//RayEngineCore/vox_file.h
-	
+set(ENGINE_PUBLIC_INCLUDES	
 	includes/RayEngineCore/test.h
 )
 
 # Список приватных исходных файлов
-set(ENGINE_PRIVATE_SOURCES
-	src/RayEngineCore/vox_file.cpp
-	
+set(ENGINE_PRIVATE_SOURCES	
 	src/RayEngineCore/test.cpp
 )
 
