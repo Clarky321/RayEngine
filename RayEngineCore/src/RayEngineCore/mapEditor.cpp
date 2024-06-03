@@ -24,19 +24,22 @@ void MapEditor::Update()
 
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
     {
+        Vector3 topCubePosition = GetTopCubePosition(currentCubePosition);
         bool positionOccupied = false;
+
+        // Check if the top position is already occupied
         for (const auto& cube : cubes)
         {
-            if (Vector3Distance(cube.position, currentCubePosition) < 0.1f)
+            if (Vector3Distance(cube.position, topCubePosition) < 0.1f)
             {
                 positionOccupied = true;
                 break;
             }
         }
+
         if (!positionOccupied)
         {
-            currentCubePosition = GetTopCubePosition(currentCubePosition);
-            cubes.push_back(Cube(currentCubePosition, currentColor));
+            cubes.push_back(Cube(topCubePosition, currentColor));
         }
     }
 
@@ -90,27 +93,25 @@ Vector3 MapEditor::GetMousePositionInWorld()
 
 Vector3 MapEditor::SnapToGrid(Vector3 position)
 {
-    return Vector3 { (float)round(position.x), (float)round(position.y), (float)round(position.z) };
+    return Vector3{ (float)round(position.x), (float)round(position.y), (float)round(position.z) };
 }
 
 Vector3 MapEditor::GetTopCubePosition(Vector3 position)
 {
     Vector3 topPosition = position;
-    bool cubeFound = false;
+    topPosition.y = 0.0f; // Start at ground level
 
+    // Check if there is a cube directly below the current position
     for (const auto& cube : cubes)
     {
-        if (Vector3Distance(cube.position, position) < 0.1f)
+        if (cube.position.x == position.x && cube.position.z == position.z)
         {
-            topPosition.y = cube.position.y + 1.0f;
-            cubeFound = true;
-            break;
+            // If a cube is found directly below, place the new block on top of it
+            if (cube.position.y >= topPosition.y)
+            {
+                topPosition.y = cube.position.y + 1.0f;
+            }
         }
-    }
-
-    if (!cubeFound)
-    {
-        topPosition.y = 0.0f;
     }
 
     return topPosition;
