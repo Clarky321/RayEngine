@@ -6,14 +6,11 @@
 class Cube
 {
 public:
-	Cube(Vector3 position);
+    Vector3 position;
+    Color color;
 
-	void Draw();
-
-	Vector3 position;
-
-private:
-	//Vector3 position;
+    Cube(Vector3 pos, Color col);
+    void Draw() const;
 };
 
 #endif // !CUBE_H
