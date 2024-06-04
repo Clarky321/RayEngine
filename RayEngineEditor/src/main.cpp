@@ -2,26 +2,43 @@
 #include <raygui.h>
 
 #include "RayEngineCore\mapEditor.h"
+#include "RayEngineCore\mainMenu.h"
 
 int main()
 {
 	InitWindow(1200, 800, "Cube Map Editor");
-	SetTargetFPS(60);
+	
+    MainMenu mainMenu;
+    MapEditor editor;
+    
+    bool editorActive = false;
 
-	MapEditor editor;
+    SetTargetFPS(60);
 
     while (!WindowShouldClose())
     {
-        // Обновление редактора
-        editor.Update();
+        if (!editorActive)
+        {
+            mainMenu.Update();
+            if (mainMenu.IsRayEditorButtonPressed())
+            {
+                editorActive = true;
+            }
+            if (mainMenu.IsExitButtonPressed())
+            {
+                break;
+            }
 
-        // Рендеринг
-        BeginDrawing();
-        ClearBackground(SKYBLUE);
-
-        editor.Render();
-
-        EndDrawing();
+            mainMenu.Render();
+        }
+        else
+        {
+            editor.Update();
+            BeginDrawing();
+            ClearBackground(SKYBLUE);
+            editor.Render();
+            EndDrawing();
+        }
     }
 
     CloseWindow();

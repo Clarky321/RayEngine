@@ -8,11 +8,7 @@ set(ENGINE_PROJECT_NAME RayEngineCore)
 set(ENGINE_PUBLIC_INCLUDES
 	includes/RayEngineCore/cube.h
 	includes/RayEngineCore/cameraController.h
-	#includes/RayEngineCore/world.h
-	#includes/RayEngineCore/chunk.h
-	#includes/RayEngineCore/player.h
-	#includes/RayEngineCore/camera.h
-	
+	includes/RayEngineCore/mainMenu.h	
 	includes/RayEngineCore/mapEditor.h
 )
 
@@ -20,11 +16,7 @@ set(ENGINE_PUBLIC_INCLUDES
 set(ENGINE_PRIVATE_SOURCES	
 	src/RayEngineCore/cube.cpp
 	src/RayEngineCore/cameraController.cpp
-	#src/RayEngineCore/world.cpp
-	#src/RayEngineCore/chunk.cpp
-	#src/RayEngineCore/player.cpp
-	#src/RayEngineCore/camera.cpp
-	
+	src/RayEngineCore/mainMenu.cpp
 	src/RayEngineCore/mapEditor.cpp
 )
 
@@ -53,18 +45,8 @@ target_compile_features(${ENGINE_PROJECT_NAME} PUBLIC cxx_std_17)
 
 # ------------------------------------------------------------------------------------- #
 
-# Добавление подмодуля RAYLIB и его сборка
 add_subdirectory(../external/raylib ${CMAKE_CURRENT_BINARY_DIR}/raylib)
-# Линковка с библиотекой RAYLIB
-#target_link_libraries(${ENGINE_PROJECT_NAME} PUBLIC raylib)
-
-# ------------------------------------------------------------------------------------- #
-
-# Добавление подмодуля RAYGUI и его сборка
 add_subdirectory(../external/raygui/projects/CMake ${CMAKE_CURRENT_BINARY_DIR}/raygui)
-# Линковка с библиотекой RAYGUI
-#target_link_libraries(${ENGINE_PROJECT_NAME} PUBLIC raygui)
+target_link_libraries(${ENGINE_PROJECT_NAME} PUBLIC raylib raygui)
 
 # ------------------------------------------------------------------------------------- #
-
-target_link_libraries(${ENGINE_PROJECT_NAME} PUBLIC raylib raygui)
