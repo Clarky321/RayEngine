@@ -18,6 +18,7 @@ private:
     Vector3 GetMousePositionInWorld();
     Vector3 SnapToGrid(Vector3 position);
     Vector3 GetTopCubePosition(Vector3 position);
+    Vector3 GetClosestCubePosition(Vector3 position);
 
 public:
     MapEditor();

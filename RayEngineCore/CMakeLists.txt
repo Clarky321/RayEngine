@@ -68,8 +68,3 @@ add_subdirectory(../external/raygui/projects/CMake ${CMAKE_CURRENT_BINARY_DIR}/r
 # ------------------------------------------------------------------------------------- #
 
 target_link_libraries(${ENGINE_PROJECT_NAME} PUBLIC raylib raygui)
-
-# Добавление подмодуля SimplexNoise и его сборка
-add_subdirectory(../external/SimplexNoise ${CMAKE_CURRENT_BINARY_DIR}/SimplexNoise)
-# Линковка с библиотекой SimplexNoise
-target_link_libraries(${ENGINE_PROJECT_NAME} PUBLIC SimplexNoise)
