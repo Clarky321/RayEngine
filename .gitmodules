@@ -4,9 +4,3 @@
 [submodule "external/raygui"]
 	path = external/raygui
 	url = https://github.com/raysan5/raygui.git
-[submodule "external/PerlinNoise"]
-	path = external/PerlinNoise
-	url = https://github.com/Reputeless/PerlinNoise.git
-[submodule "external/SimplexNoise"]
-	path = external/SimplexNoise
-	url = https://github.com/SRombauts/SimplexNoise.git
