@@ -1,46 +1,54 @@
 #include <raylib.h>
-#include <raygui.h>
+#include <rlImGui.h>
+#include <imgui.h>
 
-#include "RayEngineCore\mapEditor.h"
-#include "RayEngineCore\mainMenu.h"
+#include "RayEngineCore/mapEditor.h"
+
+//#include "RayEngineCore/mainMenu.h"
 
 int main()
 {
-	InitWindow(1200, 800, "Cube Map Editor");
-	
-    MainMenu mainMenu;
-    MapEditor editor;
-    
-    bool editorActive = false;
+    const int screenWidth = 1200;
+    const int screenHeight = 800;
+
+    // Инициализация окна
+    InitWindow(screenWidth, screenHeight, "RayEngine");
+
+    SetWindowState(FLAG_WINDOW_RESIZABLE);
+
+    // Инициализация ImGui и rlImGui
+    rlImGuiSetup(true);
+
+    //MainMenu mainMenu;
+    MapEditor mapEditor;
+    bool editorActive = true; // Начинаем с активного редактора карт
 
     SetTargetFPS(60);
 
     while (!WindowShouldClose())
     {
-        if (!editorActive)
-        {
-            mainMenu.Update();
-            if (mainMenu.IsRayEditorButtonPressed())
-            {
-                editorActive = true;
-            }
-            if (mainMenu.IsExitButtonPressed())
-            {
-                break;
-            }
+        // Начало рендеринга кадра
+        BeginDrawing();
+        ClearBackground(SKYBLUE);
 
-            mainMenu.Render();
-        }
-        else
-        {
-            editor.Update();
-            BeginDrawing();
-            ClearBackground(SKYBLUE);
-            editor.Render();
-            EndDrawing();
-        }
+        // Начало нового кадра ImGui
+        rlImGuiBegin();
+
+        // Отображаем только редактор карт
+        mapEditor.Update();
+        mapEditor.Render();
+
+        // Вызов функции для отображения демо-окна ImGui
+        ImGui::ShowDemoWindow();
+
+        // Завершение рендеринга кадра ImGui
+        rlImGuiEnd();
+
+        EndDrawing();
     }
 
+    // Завершение работы с ImGui и rlImGui
+    rlImGuiShutdown();
     CloseWindow();
 
     return 0;

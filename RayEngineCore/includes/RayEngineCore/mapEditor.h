@@ -12,7 +12,8 @@ class MapEditor
 private:
     std::vector<Cube> cubes;
     Vector3 currentCubePosition;
-    Color currentColor;
+    //Color currentColor;
+    Texture2D currentTexture;
     CameraController cameraController;
 
     Vector3 GetMousePositionInWorld();
@@ -22,6 +23,7 @@ private:
 
 public:
     MapEditor();
+    ~MapEditor();
     void Update();
     void Render();
 };

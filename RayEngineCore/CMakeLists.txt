@@ -50,3 +50,59 @@ add_subdirectory(../external/raygui/projects/CMake ${CMAKE_CURRENT_BINARY_DIR}/r
 target_link_libraries(${ENGINE_PROJECT_NAME} PUBLIC raylib raygui)
 
 # ------------------------------------------------------------------------------------- #
+
+set(IMGUI_INCLUDES
+	../external/imgui/imgui.h
+	
+	../external/imgui/imconfig.h
+	../external/imgui/imgui_internal.h
+	
+	../external/imgui/imstb_rectpack.h
+	../external/imgui/imstb_textedit.h
+	../external/imgui/imstb_truetype.h
+	
+)
+
+set(IMGUI_SOURCES
+	../external/imgui/imgui.cpp
+	
+	../external/imgui/imgui_draw.cpp
+	../external/imgui/imgui_widgets.cpp
+	../external/imgui/imgui_tables.cpp
+	
+	../external/imgui/imgui_demo.cpp
+)
+
+add_library(ImGui STATIC
+	${IMGUI_INCLUDES}
+	${IMGUI_SOURCES}
+)
+
+target_include_directories(ImGui PUBLIC ../external)
+target_include_directories(ImGui PUBLIC ../external/imgui)
+
+#target_link_libraries(${ENGINE_PROJECT_NAME} PUBLIC ImGui rlImGui)
+
+# ------------------------------------------------------------------------------------- #
+
+set(RLLMGUI_INCLUDES
+	../external/rllmgui/imgui_impl_raylib.h
+	../external/rllmgui/rlImGui.h
+	../external/rllmgui/rlImGuiColors.h
+	
+	../external/rllmgui/extras/FA6FreeSolidFontData.h
+	../external/rllmgui/extras/IconsFontAwesome6.h
+)
+
+set(RLLMGUI_SOURCES
+	../external/rllmgui/rlImGui.cpp
+)
+
+add_library(rlImGui STATIC
+	${RLLMGUI_INCLUDES}
+	${RLLMGUI_SOURCES}
+)
+
+target_include_directories(rlImGui PUBLIC ../external/rllmgui)
+
+target_link_libraries(${ENGINE_PROJECT_NAME} PUBLIC ImGui rlImGui)

@@ -1,6 +1,6 @@
 #define RAYGUI_IMPLEMENTATION
 #include <raygui.h>
-
+#include <imgui.h>
 #include "RayEngineCore\mapEditor.h"
 
 bool CheckCollisionPointCube(Vector3 point, Vector3 cubePosition, float cubeSize)
@@ -13,7 +13,14 @@ bool CheckCollisionPointCube(Vector3 point, Vector3 cubePosition, float cubeSize
         point.z <= cubePosition.z + cubeSize / 2);
 }
 
-MapEditor::MapEditor() : currentCubePosition({ 0, 0, 0 }), currentColor(RED) {}
+//MapEditor::MapEditor() : currentCubePosition({ 0, 0, 0 }), currentColor(RED) {}
+
+MapEditor::MapEditor() : currentCubePosition({ 0, 0, 0 }), currentTexture(LoadTexture("../../../assets/log_jungle.png")) {}
+
+MapEditor::~MapEditor()
+{
+    UnloadTexture(currentTexture); // Очистка текстуры
+}
 
 void MapEditor::Update()
 {
@@ -37,7 +44,7 @@ void MapEditor::Update()
 
         if (!positionOccupied)
         {
-            cubes.push_back(Cube(topCubePosition, currentColor));
+            cubes.push_back(Cube(topCubePosition, currentTexture));
         }
     }
 
@@ -57,9 +64,9 @@ void MapEditor::Update()
         }
     }
 
-    if (IsKeyPressed(KEY_ONE)) currentColor = RED;
-    if (IsKeyPressed(KEY_TWO)) currentColor = GREEN;
-    if (IsKeyPressed(KEY_THREE)) currentColor = BLUE;
+    //if (IsKeyPressed(KEY_ONE)) currentColor = RED;
+    //if (IsKeyPressed(KEY_TWO)) currentColor = GREEN;
+    //if (IsKeyPressed(KEY_THREE)) currentColor = BLUE;
 }
 
 void MapEditor::Render()
@@ -84,6 +91,11 @@ void MapEditor::Render()
     GuiLabel(Rectangle { 10, 10, 200, 20 }, "Press left mouse button to place cube");
     GuiLabel(Rectangle { 10, 40, 200, 20 }, "Press right mouse button to remove cube");
     GuiLabel(Rectangle { 10, 70, 200, 20 }, "Press 1, 2, 3 to change color");
+
+    ImGui::Begin("Demo Window");
+    ImGui::Text("Hello from the Map Editor!");
+    ImGui::ShowDemoWindow();
+    ImGui::End();
 }
 
 Vector3 MapEditor::GetMousePositionInWorld()

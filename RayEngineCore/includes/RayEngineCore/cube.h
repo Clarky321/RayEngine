@@ -7,9 +7,11 @@ class Cube
 {
 public:
     Vector3 position;
-    Color color;
+    //Color color;
+    Texture2D texture;
 
-    Cube(Vector3 pos, Color col);
+    //Cube(Vector3 pos, Color col);
+    Cube(Vector3 pos, Texture2D tex);
     void Draw() const;
 };
 

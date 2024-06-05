@@ -4,3 +4,9 @@
 [submodule "external/raygui"]
 	path = external/raygui
 	url = https://github.com/raysan5/raygui.git
+[submodule "external/imgui"]
+	path = external/imgui
+	url = https://github.com/ocornut/imgui.git
+[submodule "external/rllmgui"]
+	path = external/rllmgui
+	url = https://github.com/raylib-extras/rlImGui.git
